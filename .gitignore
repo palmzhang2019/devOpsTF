@@ -1,0 +1,7 @@
+.vscode/
+venv/
+ForgejoNTrelloConnect/.env
+ForgejoNTrelloConnect/__pycache__/
+forgejo/
+postgres/
+redis/

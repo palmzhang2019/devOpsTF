@@ -1,0 +1,54 @@
+version: '3'
+
+networks:
+  forgejo:
+    external: false
+
+services:
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:7.0.0
+    restart: always
+    ports:
+      - "3000:3000"
+      - "222:22"
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - DB_TYPE=postgres
+      - DB_HOST=db
+      - DB_NAME=forgejo
+      - DB_USER=forgejo
+      - DB_PASSWD=forgejo
+    networks:
+      - forgejo
+    volumes:
+      - ./forgejo:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_USER: forgejo
+      POSTGRES_PASSWORD: forgejo
+      POSTGRES_DB: forgejo
+    networks:
+      - forgejo
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  redis:
+    image: redis:6.2
+    restart: always
+    networks:
+      - forgejo
+    volumes:
+      - ./redis:/data
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
