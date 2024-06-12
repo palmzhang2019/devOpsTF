@@ -1,5 +1,9 @@
 from fastapi import APIRouter, Request
-from utils import make_trello_request, handle_create_card, handle_update_card, get_card_id_by_short_link, update_members, update_checklist, put_file_to_issue
+from utils import make_trello_request, handle_create_card, handle_update_card, \
+    get_card_id_by_short_link, update_members, update_checklist, put_file_to_issue, \
+    drop_issue
+from config import TRELLO_URL
+
 
 router = APIRouter()
 
@@ -43,10 +47,14 @@ async def trello_webhook(request: Request):
         if action_type == 'createCard':
             return handle_create_card(data, card_id)
         elif action_type == 'updateCard':
+            if "listBefore" in data:
+                user_id = data["action"]["idMemberCreator"]
             return handle_update_card(data, card_id)
         elif action_type == "addAttachmentToCard":
             attachment = data.get("attachment", "")
             put_file_to_issue(card_id, attachment)
+        elif action_type == "deleteCard":
+            drop_issue(card_id)
         else:
             print(action_type)
     elif request.method == "HEAD":

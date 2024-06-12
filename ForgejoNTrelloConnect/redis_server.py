@@ -20,3 +20,14 @@ def get_forgejo_id_by_card_id(card_id):
     if forgejo_id:
         forgejo_id = forgejo_id.decode('utf-8')
     return forgejo_id
+
+
+def delete_card_id(card_id):
+    """
+    从 Redis 中删除指定的 card_id 及其对应的 forgejo_id
+    """
+    response = r.delete(card_id)
+    if response == 1:
+        print(f"Deleted card_id: {card_id}")
+    else:
+        print(f"No record found for card_id: {card_id} to delete")

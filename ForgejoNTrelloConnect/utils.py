@@ -3,7 +3,7 @@ import io
 from config import label_dict, TRELLO_KEY, TRELLO_TOKEN, BASE_URL, FORGEJO_LABEL_URL,\
  FORGEJO_URL, HEADERS, OWNER, REPO, CARD_INFO_URL, CARD_MEMBERS_URL, PATCH_ISSUE_URL, \
     FORGEJO_ATTACHMENT_URL, CARD_CHECKLIST_URL
-from redis_server import store_card_url, get_forgejo_id_by_card_id
+from redis_server import store_card_url, get_forgejo_id_by_card_id, delete_card_id
 
 
 # 工具函数
@@ -126,4 +126,11 @@ def update_checklist(card_id, card_content):
     forgejo_api = get_url_from_card_id(card_id) 
     payload = {'body': update_content}
     result = make_forgejo_request("PATCH", forgejo_api, json=payload)
+    print(result)
+
+
+def drop_issue(card_id):
+    forgejo_api = get_url_from_card_id(card_id)
+    result = make_forgejo_request("DELETE", forgejo_api)
+    delete_card_id(card_id)
     print(result)
