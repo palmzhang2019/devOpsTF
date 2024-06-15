@@ -31,3 +31,22 @@ def delete_card_id(card_id):
         print(f"Deleted card_id: {card_id}")
     else:
         print(f"No record found for card_id: {card_id} to delete")
+
+def store_temp_variable(key, value, ttl=1):
+    """
+    将 key 和 value 存储在 Redis 的 temp 哈希表中，并设置过期时间
+    """
+    temp_key = "temp"
+    r.hset(temp_key, key, value)
+    # 设置 temp 哈希表的过期时间为 ttl 秒
+    r.expire(temp_key, ttl)
+    print(f"Stored key: {key} with value: {value} in temp with TTL of {ttl} seconds")
+
+
+def is_temp_variable_exists(key):
+    """
+    检查 Redis 的 temp 哈希表中是否存在指定的 key
+    """
+    temp_key = "temp"
+    exists = r.hexists(temp_key, key)
+    return exists

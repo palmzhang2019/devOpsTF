@@ -58,3 +58,24 @@ CARD_CHECKLIST_URL = "https://api.trello.com/1/cards/{card_id}/checklists?key={T
 FORGEJO_LABEL_URL = "{BASE_URL}/repos/{OWNER}/{REPO}/issues/{index}/labels"
 
 FORGEJO_ATTACHMENT_URL = "{BASE_URL}/repos/{OWNER}/{REPO}/issues/{issue_index}/assets"
+
+TRELLO_MEMBER_URL  = "https://api.trello.com/1/members/{id}?key={TRELLO_KEY}&token={TRELLO_TOKEN}"
+
+design_user_list = ['designpalm']
+
+dev_user_list = ['devpalm', 'devpalm2']
+
+review_user_list = ['reviewpalm']
+
+test_user_list = ['testpalm1']
+
+leader_user_list = ['palmleader']
+
+MEMO_LIST = "メモ"
+IDEA_LIST = '思い出す'
+DESIGN_LIST = '設計中'
+DEV_LIST = 'コーディング'
+REVIEW_LIST = 'Review'
+TEST_LIST = 'テスト'
+RECODE_LIST = '改修必要'
+DONE = '完了'

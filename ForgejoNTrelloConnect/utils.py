@@ -2,8 +2,11 @@ import requests
 import io
 from config import label_dict, TRELLO_KEY, TRELLO_TOKEN, BASE_URL, FORGEJO_LABEL_URL,\
  FORGEJO_URL, HEADERS, OWNER, REPO, CARD_INFO_URL, CARD_MEMBERS_URL, PATCH_ISSUE_URL, \
-    FORGEJO_ATTACHMENT_URL, CARD_CHECKLIST_URL
-from redis_server import store_card_url, get_forgejo_id_by_card_id, delete_card_id
+    FORGEJO_ATTACHMENT_URL, CARD_CHECKLIST_URL, TRELLO_MEMBER_URL
+from redis_server import store_card_url, get_forgejo_id_by_card_id, delete_card_id, store_temp_variable
+from datetime import datetime, timedelta, timezone
+from redis_server import is_temp_variable_exists
+from config import leader_user_list
 
 
 # 工具函数
@@ -134,3 +137,29 @@ def drop_issue(card_id):
     result = make_forgejo_request("DELETE", forgejo_api)
     delete_card_id(card_id)
     print(result)
+
+
+def get_member_info(member_id):
+    url = TRELLO_MEMBER_URL.format(id=member_id, TRELLO_KEY=TRELLO_KEY, TRELLO_TOKEN=TRELLO_TOKEN)
+    result = make_trello_request("GET", url=url)
+    return result
+
+
+def undo_card_move(card_id, list_id):
+    url = CARD_INFO_URL.format(short_link=card_id, TRELLO_KEY=TRELLO_KEY, TRELLO_TOKEN=TRELLO_TOKEN)
+    params = {
+        "idList": list_id
+    }
+    result = make_trello_request("PUT", url=url, params=params)
+    store_temp_variable(key=card_id, value="yes")
+
+
+def undo_move_if_needed(after_list_name, allowed_after_lists, user_lists, card_id, list_id, username):
+    if username in leader_user_list:
+        return
+
+    if after_list_name not in allowed_after_lists:
+        undo_card_move(card_id=card_id, list_id=list_id)
+        return
+    if username not in user_lists and not is_temp_variable_exists(card_id):
+        undo_card_move(card_id=card_id, list_id=list_id)
