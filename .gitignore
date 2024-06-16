@@ -5,3 +5,8 @@ ForgejoNTrelloConnect/__pycache__/
 forgejo/
 postgres/
 redis/
+admin-vue/node_modules/*
+admin-vue/.env
+admin-vue/.gitignore
+admin-vue/yarn.lock
+admin-vue/package-lock.json
