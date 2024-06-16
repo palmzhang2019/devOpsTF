@@ -6,7 +6,7 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home
-  },
+  }
   // 其他路由配置
 ];
 

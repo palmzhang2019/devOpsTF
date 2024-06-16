@@ -1,21 +1,21 @@
 <template>
     <div>
         <div id="forgejoUsers" style="float: left; width: 50%;">
-            <h2>Forgejo Users</h2>
-            <div v-for="user in forgejoUsers" :key="user.id" class="user"
-                 :id="'forgejo-' + user.username"
-                 :style="{ backgroundColor: getUserBgColor('forgejo', user.id) }"
-                 @click="selectUser('forgejo', user.id)">
-                {{ user.username }} ({{ user.email }})
+            <h2>Forgejo Labels</h2>
+            <div v-for="label in forgejoLabels" :key="label.id" class="label"
+                 :id="'forgejo-' + label.username"
+                 :style="{ backgroundColor: getUserBgColor('forgejo', label.id) }"
+                 @click="selectUser('forgejo', label.id)">
+                {{ label.name }}
             </div>
         </div>
         <div id="trelloUsers" style="float: right; width: 50%;">
-            <h2>Trello Users</h2>
-            <div v-for="user in trelloUsers" :key="user.id" class="user"
-                 :id="'trello-' + user.username"
-                 :style="{ backgroundColor: getUserBgColor('trello', user.id) }"
-                 @click="selectUser('trello', user.id)">
-                {{ user.username }} ({{ user.fullName }})
+            <h2>Trello Labels</h2>
+            <div v-for="label in trelloLabels" :key="label.id" class="label"
+                 :id="'trello-' + label.username"
+                 :style="{ backgroundColor: getUserBgColor('trello', label.id) }"
+                 @click="selectUser('trello', label.id)">
+                {{ label.name }}
             </div>
         </div>
         <div style="clear: both;"></div>
@@ -29,42 +29,42 @@ export default {
     name: 'UserList',
     data() {
         return {
-            forgejoUsers: null,
-            trelloUsers: null,
+            forgejoLabels: null,
+            trelloLabels: null,
             selectedForgejoUserId: null,
             selectedTrelloUserId: null,
             matchedPairs: [],
-            selectedUser: null,  // Stores the currently selected user details
+            selectedUser: null, 
             colors: ['lightblue', 'lightgreen', 'lightcoral', 'lightgoldenrodyellow', 'lightsalmon', 'lightgrey', 'lightcyan', 'lightpink', 'wheat', 'lavender']
         };
     },
     mounted() {
-        this.fetchForgejoUsers();
-        this.fetchTrelloUsers();
+        this.fetchForgejoLabels();
+        this.fetchTrelloLabels();
     },
     methods: {
-        fetchForgejoUsers() {
+        fetchForgejoLabels() {
             const owner = process.env.VUE_APP_OWNER;
             const token = process.env.VUE_APP_FORGEJO_TOKEN;
-            axios.get(`/forgejo/v1/orgs/${owner}/members`, {
+            axios.get(`/forgejo/v1/orgs/${owner}/labels`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             })
                 .then(response => {
-                    this.forgejoUsers = response.data;
+                    this.forgejoLabels = response.data;
                 })
                 .catch(error => {
                     console.error(error);
                 });
         },
-        fetchTrelloUsers() {
+        fetchTrelloLabels() {
             const boardId = process.env.VUE_APP_BOARD_ID;
             const TRELLO_KEY = process.env.VUE_APP_TRELLO_KEY;
             const TRELLO_TOKEN = process.env.VUE_APP_TRELLO_TOKEN;
-            axios.get(`/trello/boards/${boardId}/members?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`)
+            axios.get(`/trello/boards/${boardId}/labels?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`)
                 .then(response => {
-                    this.trelloUsers = response.data;
+                    this.trelloLabels = response.data;
                 })
                 .catch(error => {
                     console.error(error);
@@ -112,7 +112,7 @@ export default {
 </script>
 
 <style scoped>
-.user {
+.label {
     height: 36px;
     line-height: 36px;
     border-radius: 0.4rem;
