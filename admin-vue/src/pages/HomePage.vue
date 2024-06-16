@@ -1,18 +1,18 @@
 <template>
   <div class="home">
     <h1>Welcome to Home Page</h1>
-    <ItemList />
+    <UserList />
   </div>
 </template>
 
 <script>
-import ItemList from '../components/ItemList'
+import UserList from '../components/UserList'
 
 
 export default {
   name: 'HomePage',
   components: {
-    ItemList,
+    UserList,
   },
 }
 </script>
