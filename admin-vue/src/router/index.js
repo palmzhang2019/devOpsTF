@@ -1,13 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../pages/HomePage.vue';
+import Test from '../pages/TestPage.vue';
 
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/test',
+    name: 'Test',
+    component: Test
   }
-  // 其他路由配置
 ];
 
 const router = createRouter({
