@@ -17,14 +17,22 @@
       <el-divider></el-divider>
       <el-row :gutter="20" class="role-row">
         <el-col v-for="(role, index) in roles" :key="index" :span="8" class="role-col">
-          <el-card class="role-card" shadow="hover" v-drop:role="handleDrop">
+          <el-card class="role-card" shadow="hover" @dragover="onDragOver" @drop="onDrop($event, role, 'role')">
             <p>{{ role.title }}</p>
+            <div v-if="role.users && role.users.length">
+              <div v-for="(user, userIndex) in role.users" :key="userIndex" class="user-card" draggable="true" @dragstart="onDragStart($event, user, role.title)">
+                <span>{{ user.fullName }}</span>
+                <span class="split">|</span>
+                <span>{{ user.username }}</span>
+              </div>
+            </div>
           </el-card>
         </el-col>
       </el-row>
-      <el-row :gutter="20" class="user-row">
+      <el-divider></el-divider>
+      <el-row :gutter="20" class="user-row" @dragover="onDragOver" @drop="onDrop($event, null, 'user')">
         <el-col v-for="(user, index) in trelloUsers" :key="index" :span="6" class="user-col">
-          <div class="user-card" shadow="hover" v-drag:transfer="user" drag-data="user">
+          <div class="user-card" shadow="hover" draggable="true" @dragstart="onDragStart($event, user, 'user')">
             <span>{{ user.fullName }}</span>
             <span class="split">|</span>
             <span>{{ user.username }}</span>
@@ -38,14 +46,9 @@
 <script>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { directive as onDrag, directive as onDrop } from 'vue-drag-drop';
 
 export default {
   name: 'RoleManager',
-  directives: {
-    onDrag,
-    onDrop,
-  },
   setup() {
     const trelloUsers = ref([]);
     const form = ref({
@@ -56,7 +59,7 @@ export default {
 
     const addRole = () => {
       if (form.value.name.trim()) {
-        roles.value.push({ title: form.value.name });
+        roles.value.push({ title: form.value.name, users: [] });
         form.value.name = '';
       }
     };
@@ -74,13 +77,44 @@ export default {
         });
     };
 
-    const handleDrop = (data, role) => {
-      // Here you can handle what happens when a user is dropped into a role card
-      console.log('Dropped user:', data, 'on role:', role);
-      // For example, you can assign the user to the role
-      // Assuming you want to add the user data to the role object
-      role.users = role.users || [];
-      role.users.push(data);
+    const onDragStart = (event, user, source) => {
+      event.dataTransfer.setData('user', JSON.stringify(user));
+      event.dataTransfer.setData('source', source);
+      event.dataTransfer.effectAllowed = 'move';
+    };
+
+    const onDragOver = (event) => {
+      event.preventDefault();
+    };
+
+    const onDrop = (event, targetRole, targetType) => {
+      event.preventDefault();
+      const userData = event.dataTransfer.getData('user');
+      const source = event.dataTransfer.getData('source');
+      if (userData) {
+        const user = JSON.parse(userData);
+
+        // 移除用户从原来的位置
+        if (source === 'user') {
+          trelloUsers.value = trelloUsers.value.filter(u => u.username !== user.username);
+        } else {
+          const sourceRole = roles.value.find(role => role.title === source);
+          if (sourceRole) {
+            sourceRole.users = sourceRole.users.filter(u => u.username !== user.username);
+          }
+        }
+
+        // 添加用户到新的位置
+        if (targetType === 'role') {
+          if (!targetRole.users.find(u => u.username === user.username)) {
+            targetRole.users.push(user);
+          }
+        } else if (targetType === 'user') {
+          if (!trelloUsers.value.find(u => u.username === user.username)) {
+            trelloUsers.value.push(user);
+          }
+        }
+      }
     };
 
     onMounted(() => {
@@ -92,7 +126,9 @@ export default {
       roles,
       addRole,
       trelloUsers,
-      handleDrop,
+      onDragStart,
+      onDragOver,
+      onDrop,
     };
   },
 };
@@ -126,10 +162,18 @@ h1 {
 }
 
 .role-card {
-  width: 100%;
   text-align: center;
   padding: 20px;
   border-radius: 10px;
+}
+
+.user-row {
+  margin-top: 20px;
+}
+
+.user-col {
+  display: flex;
+  justify-content: center;
 }
 
 .user-card {
