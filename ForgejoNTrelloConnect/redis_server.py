@@ -1,4 +1,5 @@
 import redis
+import json
 
 # 连接到 Redis 服务器
 r = redis.Redis(host='localhost', port=6379, db=1)
@@ -50,3 +51,30 @@ def is_temp_variable_exists(key):
     temp_key = "temp"
     exists = r.hexists(temp_key, key)
     return exists
+
+def store_or_update_roles_users(roles_users):
+    """
+    存储或更新角色和用户信息
+    """
+    for role in roles_users:
+        title = role["title"]
+        users = role["users"]
+        for user in users:
+            user_id = user["id"]
+            user_info = {
+                "fullName": user["fullName"],
+                "username": user["username"]
+            }
+            # 将用户信息存储在 Redis 的哈希表中，键名为 "role:{title}"
+            r.hset(f"role:{title}", user_id, json.dumps(user_info))
+            print(f"Stored or updated user_id: {user_id} with info: {user_info} under role: {title}")
+
+def get_users_by_role(title):
+    """
+    通过角色标题获取所有用户信息
+    """
+    users = r.hgetall(f"role:{title}")
+    users_info = {}
+    for user_id, user_info in users.items():
+        users_info[user_id.decode('utf-8')] = json.loads(user_info.decode('utf-8'))
+    return users_info

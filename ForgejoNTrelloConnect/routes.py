@@ -94,3 +94,8 @@ async def trello_webhook(request: Request):
             print(action_type)
     elif request.method == "HEAD":
         return {"status": "OK"}
+
+@router.post("/role-users")
+async def update_role_users(request: Request):
+    body = await request.json()
+    

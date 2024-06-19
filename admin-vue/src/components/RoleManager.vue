@@ -39,6 +39,8 @@
           </div>
         </el-col>
       </el-row>
+      <el-divider></el-divider>
+      <el-button type="primary" @click="getRolesWithUsers">Get Roles and Users</el-button>
     </el-main>
   </el-container>
 </template>
@@ -117,6 +119,15 @@ export default {
       }
     };
 
+    const getRolesWithUsers = () => {
+      const rolesWithUsers = roles.value.map(role => ({
+        title: role.title,
+        users: role.users.map(user => ({ id: user.id, fullName: user.fullName, username: user.username }))
+      }));
+      console.log(rolesWithUsers);
+      // Here you can do whatever you want with the rolesWithUsers, like returning it or displaying it
+    };
+
     onMounted(() => {
       fetchTrelloUsers();
     });
@@ -129,6 +140,7 @@ export default {
       onDragStart,
       onDragOver,
       onDrop,
+      getRolesWithUsers,
     };
   },
 };
