@@ -54,27 +54,21 @@ def is_temp_variable_exists(key):
 
 def store_or_update_roles_users(roles_users):
     """
-    存储或更新角色和用户信息
+    存储或更新角色和用户信息到一个名为 'roles' 的 Redis 键中
     """
-    for role in roles_users:
-        title = role["title"]
-        users = role["users"]
-        for user in users:
-            user_id = user["id"]
-            user_info = {
-                "fullName": user["fullName"],
-                "username": user["username"]
-            }
-            # 将用户信息存储在 Redis 的哈希表中，键名为 "role:{title}"
-            r.hset(f"role:{title}", user_id, json.dumps(user_info))
-            print(f"Stored or updated user_id: {user_id} with info: {user_info} under role: {title}")
+    # 将整个 roles_users 列表转换为 JSON 字符串
+    roles_users_json = json.dumps(roles_users)
+    
+    # 将 JSON 字符串存储在名为 'roles' 的 Redis 键中
+    r.set('roles', roles_users_json)
+    print("Stored or updated roles with users information")
 
-def get_users_by_role(title):
+def get_roles_users():
     """
-    通过角色标题获取所有用户信息
+    从 Redis 中获取所有角色和用户信息
     """
-    users = r.hgetall(f"role:{title}")
-    users_info = {}
-    for user_id, user_info in users.items():
-        users_info[user_id.decode('utf-8')] = json.loads(user_info.decode('utf-8'))
-    return users_info
+    roles_users_json = r.get('roles')
+    if roles_users_json:
+        roles_users = json.loads(roles_users_json)
+        return roles_users
+    return None

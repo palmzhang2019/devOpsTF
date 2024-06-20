@@ -14,6 +14,11 @@ module.exports = defineConfig({
         changeOrigin: true, // 是否修改请求的主机头
         pathRewrite: { '^/trello': '/1' }, // 可选：重写路径
       },
+      '/local': {
+        target: 'http://127.0.0.1:8000', // 目标服务器
+        changeOrigin: true, // 是否修改请求的主机头
+        pathRewrite: { '^/local': '' }, // 可选：重写路径
+      }
     },
   },
 });

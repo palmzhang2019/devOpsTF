@@ -5,6 +5,8 @@ from utils import make_trello_request, handle_create_card, handle_update_card, \
 from config import TRELLO_URL, leader_user_list, dev_user_list, design_user_list, \
     review_user_list, test_user_list, IDEA_LIST, DESIGN_LIST, DEV_LIST, REVIEW_LIST, \
     TEST_LIST, RECODE_LIST, DONE, MEMO_LIST
+from redis_server import store_or_update_roles_users, get_roles_users
+from fastapi.encoders import jsonable_encoder
 
 
 router = APIRouter()
@@ -98,4 +100,11 @@ async def trello_webhook(request: Request):
 @router.post("/role-users")
 async def update_role_users(request: Request):
     body = await request.json()
-    
+    store_or_update_roles_users(body)
+    return {"message": "Roles and users have been updated successfully"}
+
+@router.get("/role-users")
+async def get_role_users():
+    users_info = get_roles_users()
+    json_compatible_data = jsonable_encoder(users_info)
+    return json_compatible_data

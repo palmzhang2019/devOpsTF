@@ -53,6 +53,7 @@ export default {
   name: 'RoleManager',
   setup() {
     const trelloUsers = ref([]);
+    const roleUsers = ref(null);
     const form = ref({
       name: '',
     });
@@ -70,13 +71,45 @@ export default {
       const boardId = process.env.VUE_APP_BOARD_ID;
       const TRELLO_KEY = process.env.VUE_APP_TRELLO_KEY;
       const TRELLO_TOKEN = process.env.VUE_APP_TRELLO_TOKEN;
-      axios.get(`/trello/boards/${boardId}/members?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`)
+      return axios.get(`/trello/boards/${boardId}/members?key=${TRELLO_KEY}&token=${TRELLO_TOKEN}`)
         .then(response => {
           trelloUsers.value = response.data;
         })
         .catch(error => {
           console.error(error);
         });
+    };
+
+    const fetchRolesUsers = () => {
+      axios.get(`/local/role-users`)
+        .then(response => {
+          roleUsers.value = response.data;
+          initializeRolesAndUsers();
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    };
+
+    const initializeRolesAndUsers = () => {
+      const roleMap = {};
+      const usersSet = new Set();
+
+      roleUsers.value.forEach(roleUser => {
+        const { title, users } = roleUser;
+        roleMap[title] = users.map(user => {
+          usersSet.add(user.username);
+          return user;
+        });
+      });
+
+      roles.value = Object.keys(roleMap).map(roleTitle => ({
+        title: roleTitle,
+        users: roleMap[roleTitle]
+      }));
+
+      const allUsers = trelloUsers.value.filter(user => !usersSet.has(user.username));
+      trelloUsers.value = allUsers;
     };
 
     const onDragStart = (event, user, source) => {
@@ -119,17 +152,23 @@ export default {
       }
     };
 
-    const getRolesWithUsers = () => {
+    const getRolesWithUsers = async () => {
       const rolesWithUsers = roles.value.map(role => ({
         title: role.title,
         users: role.users.map(user => ({ id: user.id, fullName: user.fullName, username: user.username }))
       }));
-      console.log(rolesWithUsers);
-      // Here you can do whatever you want with the rolesWithUsers, like returning it or displaying it
+      try {
+        const response = await axios.post('/local/role-users', rolesWithUsers);
+        console.log(response.data);
+        // Handle the response as needed
+      } catch (error) {
+        console.error('Error updating roles and users:', error);
+        // Handle the error as needed
+      }
     };
 
     onMounted(() => {
-      fetchTrelloUsers();
+      fetchTrelloUsers().then(fetchRolesUsers);
     });
 
     return {
