@@ -10,3 +10,4 @@ admin-vue/.env
 admin-vue/.gitignore
 admin-vue/yarn.lock
 admin-vue/package-lock.json
+.idea/
